@@ -5,4 +5,4 @@ variable "region" {
 
 variable "application_name" {}
 variable "environment" {}
-variable "imageVersion" {}
+variable "CLUSTER_NAME" {}

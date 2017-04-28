@@ -1,6 +1,6 @@
 resource "aws_ecs_service" "service" {
   name = "${var.application_name}-${var.environment}"
-  cluster = "arn:aws:ecs:eu-west-1:247237293916:cluster/iya-cluster-${var.environment}"
+  cluster = "arn:aws:ecs:eu-west-1:247237293916:cluster/${var.CLUSTER_NAME}"
   task_definition = "${aws_ecs_task_definition.api.arn}"
   iam_role = "${aws_iam_role.ecs-role.arn}"
   depends_on = [
@@ -21,30 +21,20 @@ resource "aws_ecs_service" "service" {
   load_balancer {
     target_group_arn = "${aws_alb_target_group.ecs-service.arn}"
     container_name = "${var.application_name}-${var.environment}"
-    container_port = 8080
+    container_port = 8000
   }
 }
 
 resource "aws_ecs_task_definition" "api" {
-  family = "iya-pubnotes-${var.environment}"
+  family = "${var.application_name}-${var.environment}"
   container_definitions = <<EOF
     [
       {
         "name": "${var.application_name}-${var.environment}",
-        "environment": [
-          {
-            "Name": "REDIS_PORT",
-            "value": "${aws_elasticache_cluster.redis.cache_nodes.0.port}"
-          },
-          {
-            "Name": "REDIS_HOST",
-            "value": "${aws_elasticache_cluster.redis.cache_nodes.0.address}"
-          }
-        ],
-        "image": "trinitymirror/ep-${var.application_name}:${var.imageVersion}",
+        "image": "crccheck/hello-world",
         "portMappings": [
           {
-            "ContainerPort": 8080,
+            "ContainerPort": 8000,
             "protocol": "tcp"
           }
         ],
@@ -57,7 +47,7 @@ resource "aws_ecs_task_definition" "api" {
 }
 
 resource "aws_alb" "ecs-service" {
-  name = "iya-pubnotes-${var.environment}"
+  name = "${var.application_name}-${var.environment}"
   internal = false
   subnets = [
     "subnet-ecefc79a",
@@ -72,8 +62,8 @@ resource "aws_alb" "ecs-service" {
 }
 
 resource "aws_alb_target_group" "ecs-service" {
-  name = "iya-pubnotes-${var.environment}"
-  port = 8080
+  name = "${var.application_name}-${var.environment}"
+  port = 8000
   protocol = "HTTP"
   vpc_id = "vpc-871d38e3"
   health_check = {
