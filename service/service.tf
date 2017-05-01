@@ -38,6 +38,14 @@ resource "aws_ecs_task_definition" "api" {
             "protocol": "tcp"
           }
         ],
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "${aws_cloudwatch_log_group.service.name}",
+                "awslogs-region": "${var.REGION}",
+                "awslogs-stream-prefix": "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
+            }
+        },
         "memory": 256,
         "name": "${var.SERVICE_NAME}-${var.ENVIRONMENT}",
         "essential" : true
