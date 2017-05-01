@@ -8,4 +8,4 @@ export TF_VAR_VPC_ID=vpc-871d38e3
 
 # Run terraform plan
 terraform plan
-terraform destroy
+terraform apply
