@@ -1,6 +1,6 @@
 resource "aws_ecs_service" "service" {
-  name = "${var.application_name}-${var.environment}"
-  cluster = "arn:aws:ecs:eu-west-1:247237293916:cluster/${var.CLUSTER_NAME}"
+  name = "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
+  cluster = "arn:aws:ecs:eu-west-1:${var.ACCOUNT_NUMBER}:cluster/${var.CLUSTER_NAME}"
   task_definition = "${aws_ecs_task_definition.api.arn}"
   iam_role = "${aws_iam_role.ecs-role.arn}"
   depends_on = [
@@ -20,17 +20,17 @@ resource "aws_ecs_service" "service" {
 
   load_balancer {
     target_group_arn = "${aws_alb_target_group.ecs-service.arn}"
-    container_name = "${var.application_name}-${var.environment}"
+    container_name = "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
     container_port = 8000
   }
 }
 
 resource "aws_ecs_task_definition" "api" {
-  family = "${var.application_name}-${var.environment}"
+  family = "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
   container_definitions = <<EOF
     [
       {
-        "name": "${var.application_name}-${var.environment}",
+        "name": "${var.SERVICE_NAME}-${var.ENVIRONMENT}",
         "image": "crccheck/hello-world",
         "portMappings": [
           {
@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "api" {
           }
         ],
         "memory": 256,
-        "name": "${var.application_name}-${var.environment}",
+        "name": "${var.SERVICE_NAME}-${var.ENVIRONMENT}",
         "essential" : true
       }
     ]
@@ -47,25 +47,26 @@ resource "aws_ecs_task_definition" "api" {
 }
 
 resource "aws_alb" "ecs-service" {
-  name = "${var.application_name}-${var.environment}"
+  name = "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
   internal = false
   subnets = [
     "subnet-ecefc79a",
     "subnet-a481b5c0",
-    "subnet-a481b5c0"]
+    "subnet-a481b5c0"
+  ]
 
   tags {
-    Environment = "${var.environment}"
+    Environment = "${var.ENVIRONMENT}"
   }
 
   security_groups = ["${aws_security_group.service.id}"]
 }
 
 resource "aws_alb_target_group" "ecs-service" {
-  name = "${var.application_name}-${var.environment}"
+  name = "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
   port = 8000
   protocol = "HTTP"
-  vpc_id = "vpc-871d38e3"
+  vpc_id = "${var.VPC_ID}"
   health_check = {
     path = "/healthcheck"
   }
@@ -83,7 +84,7 @@ resource "aws_alb_listener" "ecs-service" {
 }
 
 resource "aws_iam_role" "ecs-role" {
-  name = "${var.application_name}_${var.environment}_ecs_iam_role"
+  name = "${var.SERVICE_NAME}_${var.ENVIRONMENT}_ecs_iam_role"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -102,7 +103,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "ecs-policy" {
-  name = "${var.application_name}_${var.environment}_ecs_iam_policy"
+  name = "${var.SERVICE_NAME}_${var.ENVIRONMENT}_ecs_iam_policy"
   role = "${aws_iam_role.ecs-role.id}"
   policy = <<EOF
 {
@@ -127,9 +128,9 @@ EOF
 }
 
 resource "aws_security_group" "service" {
-  name = "${var.application_name}_${var.environment}_ALB_sec_group"
+  name = "${var.SERVICE_NAME}_${var.ENVIRONMENT}_ALB_sec_group"
   description = "ECS ALB Security Group"
-  vpc_id = "vpc-871d38e3"
+  vpc_id = "${var.VPC_ID}"
 
   ingress {
     from_port = 80
