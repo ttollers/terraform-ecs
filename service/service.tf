@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "service" {
     [
       {
         "name": "${var.SERVICE_NAME}-${var.ENVIRONMENT}",
-        "image": "crccheck/hello-world",
+        "image": "${var.IMAGE_NAME}",
         "portMappings": [
           {
             "ContainerPort": 8000,

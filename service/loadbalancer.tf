@@ -2,11 +2,7 @@
 resource "aws_alb" "service" {
   name = "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
   internal = false
-  subnets = [
-    "subnet-ecefc79a",
-    "subnet-a481b5c0",
-    "subnet-a481b5c0"
-  ]
+  subnets = ["${var.LB_SUBNETS}"]
 
   tags {
     Environment = "${var.ENVIRONMENT}"
