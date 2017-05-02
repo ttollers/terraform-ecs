@@ -1,5 +1,5 @@
 
-resource "aws_alb" "ecs-service" {
+resource "aws_alb" "service" {
   name = "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
   internal = false
   subnets = [
@@ -15,7 +15,7 @@ resource "aws_alb" "ecs-service" {
   security_groups = ["${aws_security_group.service.id}"]
 }
 
-resource "aws_alb_target_group" "ecs-service" {
+resource "aws_alb_target_group" "service" {
   name = "${var.SERVICE_NAME}-${var.ENVIRONMENT}"
   port = 8000
   protocol = "HTTP"
@@ -25,20 +25,20 @@ resource "aws_alb_target_group" "ecs-service" {
   }
 }
 
-resource "aws_alb_listener" "ecs-service" {
-  load_balancer_arn = "${aws_alb.ecs-service.arn}"
+resource "aws_alb_listener" "service" {
+  load_balancer_arn = "${aws_alb.service.arn}"
   port = 80
   protocol = "HTTP"
-  depends_on = ["aws_alb_target_group.ecs-service"]
+  depends_on = ["aws_alb_target_group.service"]
   default_action {
-    target_group_arn = "${aws_alb_target_group.ecs-service.arn}"
+    target_group_arn = "${aws_alb_target_group.service.arn}"
     type = "forward"
   }
 }
 
 
 resource "aws_security_group" "service" {
-  name = "${var.SERVICE_NAME}_${var.ENVIRONMENT}_ALB_sec_group"
+  name = "${var.SERVICE_NAME}_${var.ENVIRONMENT}_ALB"
   description = "ECS ALB Security Group"
   vpc_id = "${var.VPC_ID}"
 

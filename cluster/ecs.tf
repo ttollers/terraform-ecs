@@ -34,7 +34,17 @@ resource "aws_launch_configuration" "cluster" {
   security_groups = [
     "${aws_security_group.cluster.id}"]
   iam_instance_profile = "${aws_iam_instance_profile.cluster.arn}"
-  user_data = "${file("user-data.txt")}"
+  user_data = <<EOF
+#!/bin/bash -xe
+yum install -y aws-cli nfs-utils
+aws s3 cp s3://tm-ep-dockerhub-credentials/ecs/ecs.config /etc/ecs/ecs.config
+echo "ECS_CLUSTER=${aws_ecs_cluster.cluster.name}" >> /etc/ecs/ecs.config
+echo "ECS_AVAILABLE_LOGGING_DRIVERS=[\"json-file\",\"awslogs\"]" >> /etc/ecs/ecs.config
+docker ps
+service docker restart
+start ecs
+EOF
+
   lifecycle {
     create_before_destroy = true
   }

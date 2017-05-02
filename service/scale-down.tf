@@ -23,7 +23,7 @@ resource "aws_cloudwatch_metric_alarm" "scale-down" {
 resource "aws_appautoscaling_target" "scale-down" {
   max_capacity = 10
   min_capacity = 1
-  resource_id = "service/${var.CLUSTER_NAME}/${var.SERVICE_NAME}-${var.ENVIRONMENT}"
+  resource_id = "service/${var.CLUSTER_NAME}/${aws_ecs_service.service.name}"
   role_arn = "arn:aws:iam::${var.ACCOUNT_NUMBER}:role/ecsAutoscaleRole"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace = "ecs"
@@ -34,7 +34,7 @@ resource "aws_appautoscaling_policy" "scale-down" {
   cooldown = 60
   metric_aggregation_type = "Maximum"
   name = "${var.SERVICE_NAME}-scaling-${var.ENVIRONMENT}"
-  resource_id = "service/${var.CLUSTER_NAME}/${var.SERVICE_NAME}-${var.ENVIRONMENT}"
+  resource_id = "service/${var.CLUSTER_NAME}/${aws_ecs_service.service.name}"
   scalable_dimension = "ecs:service:DesiredCount"
   service_namespace = "ecs"
 
@@ -47,4 +47,3 @@ resource "aws_appautoscaling_policy" "scale-down" {
     "aws_appautoscaling_target.scale-down"
   ]
 }
-
