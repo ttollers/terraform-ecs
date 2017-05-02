@@ -5,7 +5,9 @@ A parameterized working example of AWS ECS using Terraform.
 ## Cluster:
 
 ```
-bash ecs-cluser/launch.sh
+cd cluster
+terraform plan
+terraform apply
 ```
 
 Terraform Variables:
@@ -22,7 +24,9 @@ Terraform Variables:
 Add a container based service to the cluster.
 
 ```
-bash service/launch.sh
+cd service
+terraform plan
+terraform apply
 ```
 
 | Name   | Default      | Description |
